@@ -1,3 +1,6 @@
+from numpy import *
+import matplotlib.pyplot as plt
+
 def loadDataSet():
     dataMat = []
     labelMat = []
@@ -9,7 +12,7 @@ def loadDataSet():
     return dataMat, labelMat
 
 def sigmoid(inX):
-    return 1.0/(1+exp(-inX))
+    return 1.0/(1 + exp(-inX))
 
 def gradAscent(dataMatIn, classLabels):
     # convert to numpy matrix data type
@@ -19,16 +22,14 @@ def gradAscent(dataMatIn, classLabels):
     alpha = 0.001
     maxCycles = 500
     weights = ones((n, 1))
+    # matrix multiplication
     for k in range(maxCycles):
-        # matrix multiplication
         h = sigmoid(dataMatrix * weights)
         error = (labelMat - h)
         weights = weights + alpha * dataMatrix.transpose() * error
     return weights
 
-def plotBestFit(wei):
-    import matplotlib.pyplot as plt
-    weights = wei.getA()
+def plotBestFit(weights):
     dataMat, labelMat = loadDataSet()
     dataArr = array(dataMat)
     n = shape(dataArr)[0]
@@ -53,9 +54,23 @@ def plotBestFit(wei):
     ax.plot(x, y)
     plt.xlabel('X1')
     plt.ylabel('X2')
-    plot.show()
+    plt.show()
 
+def stocGradAscent0(dataMatrix, classLabels):
+    m, n = shape(dataMatrix)
+    alpha = 0.01
+    weights = ones(n)
+    for i in range(m):
+        h = sigmoid(sum(dataMatrix[i] * weights))
+        error = classLabels[i] - h
+        weights = weights + alpha * error * dataMatrix[i]
+    return weights
 
-
-
+def stocGradAscent1(dataMatrix, classLabels, numIter=150):
+    m, n = shape(dataMatrix)
+    weights = ones(n)
+    for j in range(numIter):
+        for i in range(m):
+            alpha = 4/(1.0 + j + i) + 0.01
+            randIndex = int()
 
