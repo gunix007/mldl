@@ -12,7 +12,8 @@ def loadDataSet():
     return dataMat, labelMat
 
 def sigmoid(inX):
-    return 1.0/(1 + exp(-inX))
+    # return 1.0/(1 + exp(-inX))
+    return 0.5 * (1 + tanh(0.5 * inX))
 
 def gradAscent(dataMatIn, classLabels):
     # convert to numpy matrix data type
@@ -70,7 +71,57 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
     m, n = shape(dataMatrix)
     weights = ones(n)
     for j in range(numIter):
+        dataIndex = range(m)
         for i in range(m):
+            # alpha changes with each iteration
             alpha = 4/(1.0 + j + i) + 0.01
-            randIndex = int()
+            # update vectors are randomly selected
+            randIndex = int(random.uniform(0, len(dataIndex)))
+            h = sigmoid(sum(dataMatrix[randIndex] * weights))
+            error = classLabels[randIndex] - h
+            weights = weights + alpha * error * dataMatrix[randIndex]
+            del(dataIndex[randIndex])
+    return weights
+
+def classifyVector(inX, weights):
+    prob = sigmoid(sum(inX * weights))
+    if prob > 0.5:
+        return 1.0
+    else:
+        return 0.0
+
+def colicTest():
+    frTrain = open('horseColicTraining.txt')
+    frTest = open('horseColicTest.txt')
+    trainingSet = []
+    trainingLabels = []
+    for line in frTrain.readlines():
+        currLine = line.strip().split('\t')
+        lineAddr = []
+        for i in range(21):
+            lineAddr.append(float(currLine[i]))
+        trainingSet.append(lineAddr)
+        trainingLabels.append(float(currLine[21]))
+    trainWeights = stocGradAscent1(array(trainingSet), trainingLabels, 500)
+    errorCount = 0
+    numTestVec = 0.0
+    for line in frTest.readlines():
+        numTestVec += 1.0
+        currLine = line.strip().split('\t')
+        lineAddr = []
+        for i in range(21):
+            lineAddr.append(float(currLine[i]))
+        if int(classifyVector(array(lineAddr), trainWeights)) != int(currLine[21]):
+            errorCount += 1
+    errorRate = (float(errorCount)/numTestVec)
+    print("the error rate of this test is: %f" % errorRate)
+    return errorRate
+
+def multiTest():
+    numTests = 10
+    errorSum = 0.0
+    for k in range(numTests):
+        errorSum += colicTest()
+    print("after %d iteration the average error rate is: %f" % (numTests, errorSum/float(numTests)))
+
 
