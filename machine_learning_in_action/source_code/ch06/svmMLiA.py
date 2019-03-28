@@ -40,7 +40,8 @@ def smoSimple(dataMatIn, classLabels, C, toler, maxIter):
             fXi = float(multiply(alphas, labelMat).T * (dataMatrix * dataMatrix[i, :].T)) + b
             Ei = fXi - float(labelMat[i])
             # test the value of alpha whether it needs optimization
-            if ((labelMat[i] * Ei < -toler) and (alphas[i] < C)) or ((labelMat[i] * Ei > toler) and (alphas[i] > 0)):
+            if ((labelMat[i] * Ei < -toler) and (alphas[i] < C)) \
+                    or ((labelMat[i] * Ei > toler) and (alphas[i] > 0)):
                 # randomly select second alpha
                 j = selectJrand(i, m)
                 fXj = float(multiply(alphas, labelMat).T * (dataMatrix * dataMatrix[j, :].T)) + b
@@ -57,7 +58,8 @@ def smoSimple(dataMatIn, classLabels, C, toler, maxIter):
                 if (L == H):
                     print("L == H")
                     continue
-                eta = 2.0 * dataMatrix[i, :] * dataMatrix[j, :].T - dataMatrix[i, :] * dataMatrix[i, :].T - dataMatrix[j, :] * dataMatrix[j, :].T
+                eta = 2.0 * dataMatrix[i, :] * dataMatrix[j, :].T - dataMatrix[i, :] * dataMatrix[i, :].T \
+                        - dataMatrix[j, :] * dataMatrix[j, :].T
                 if (eta >= 0):
                     print("eta >= 0")
                     continue
@@ -114,7 +116,7 @@ def selectJ(i, oS, Ei):
     validEcacheList = nonzeros(oS.eCache[:, 0].A)[0]
     if (len(validEcacheList)) > 1:
         for k in validEcacheList:
-            if k == i:
+            if (k == i):
                 continue
             Ek = calcEk(oS, k)
             deltaE = abs(Ei - Ek)
@@ -134,11 +136,13 @@ def updateEk(oS, k):
     oS.eCache[k] = [1, Ek]
 # support functions for full Platt SMO, end
 
-# complete platt SMO algorithm, optimized version
+# complete platt SMO algorithm, optimised version
 def innerL(i, oS):
     Ei = calcEk(oS, i)
-    if ((oS.labelMat[i] * Ei < -oS.tol) and (oS.alphas[] < oS.C)) or ((oS.labelMat[i] * Ei > oS.tol) and (oS.alphas[i] > 0)):
+    if ((oS.labelMat[i] * Ei < -oS.tol) and (oS.alphas[i] < oS.C)) \
+            or ((oS.labelMat[i] * Ei > oS.tol) and (oS.alphas[i] > 0)):
         j, Ej = selectJ(i, oS, Ei)
+        # select the second alpha
         alphaIold = oS.alphas[i].copy()
         alphaJold = oS.alphas[j].copy()
         if (oS.labelMat[i] != oS.labelMat[j]):
@@ -147,11 +151,11 @@ def innerL(i, oS):
         else:
             L = max(0, oS.alphas[j] + oS.alphas[i] - oS.C)
             H = min(oS.C, oS.alphas[j] + oS.alphas[i])
-        if L == H:
+        if (L == H):
             print("L == H")
             return 0
         eta = 2.0 * oS.X[i, :] * oS.X[j, :].T - oS.X[i, :] * oS.X[i, :].T - oS.X[j, :] * oS.X[j, :].T
-        if (eta > 0):
+        if (eta >= 0):
             print("eta >= 0")
             return 0
         oS.alphas[j] -= oS.labelMat[j] * (Ei - Ej) / eta
@@ -160,10 +164,12 @@ def innerL(i, oS):
         if (abs(oS.alphas[j] - alphaJold) < 0.00001):
             print("j not moving enough")
             return 0
-        oS.alphas[i] += oS.labelMat[j] * oS.labelMat[i] * (alphaJold - oS.alphas[])
+        oS.alphas[i] += oS.labelMat[j] * oS.labelMat[i] * (alphaJold - oS.alphas[j])
         updateEk(oS, i)
-        b1 = oS.b - Ei - oS.labelMat[i] * (oS.alphas[i] - alphaIold) * oS.X[i, :] * oS.X[i, :].T - oS.labelMat[j] * (oS.alphas[j] - alphaJold) * oS.X[i, :] * oS.X[j, :].T
-        b2 = oS.b - Ej - oS.labelMat[i] * (oS.alphas[i] - alphaIold) * oS.X[i, :] * oS.X[j, :].T - oS.labelMat[j] * (oS.alphas[j] - alphaJold) * oS.X[j, :] * oS.X[j, :].T
+        b1 = oS.b - Ei - oS.labelMat[i] * (oS.alphas[i] - alphaIold) * oS.X[i, :] * oS.X[i, :].T \
+                - oS.labelMat[j] * (oS.alphas[j] - alphaJold) * oS.X[i, :] * oS.X[j, :].T
+        b2 = oS.b - Ej - oS.labelMat[i] * (oS.alphas[i] - alphaIold) * oS.X[i, :] * oS.X[j, :].T \
+                - oS.labelMat[j] * (oS.alphas[j] - alphaJold) * oS.X[j, :] * oS.X[j, :].T
         if (0 < oS.alphas[i]) and (oS.C > oS.alphas[i]):
             oS.b = b1
         elif (0 < oS.alphas[j]) and (oS.C > oS.alphas[j]):
