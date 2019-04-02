@@ -88,6 +88,7 @@ def classifyPerson():
     classifierResult = classify0((inArr - minVals)/ranges, normMat, datingLabels, 3)
     print("You will probably like this person: ", resultList[classifierResult - 1])
 
+# change image of 32 x 32 pixels to 1 x 1024 vector
 def img2vector(filename):
     returnVect = zeros((1, 1024))
     fr = open(filename)
